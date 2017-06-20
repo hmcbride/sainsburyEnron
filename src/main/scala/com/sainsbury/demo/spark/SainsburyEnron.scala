@@ -45,19 +45,19 @@ object SainsburyEnron {
     val emailXMLs = sc.wholeTextFiles(emailxmls)
 
     val toEmails =  emailXMLs.map(x=> getAddressees(x._2,"#To"))
-                        .map(y => y.split(";"))
-                        .flatMap(z => z)
-                        .map(r => (r,1))
-                        .reduceByKey(_ + _)
-                        .sortBy(s => s._2)
+                        .map(y => y.split(";"))       // Split the email list back up again
+                        .flatMap(z => z)              // Identity mapping to merge arrays
+                        .map(r => (r,1))              // Weight the email
+                        .reduceByKey(_ + _)           // reduce emails to get total counts for each email
+                        .sortBy(s => s._2)            // sort emails by count
 
 
     val ccEmails =  emailXMLs.map(x=> getAddressees(x._2,"#CC"))
-                        .map(x => x.split(";"))      // Split the email list back up again
-                        .flatMap(x => x)             // Identity mapping to merge arrays
-                        .map(x => (x,0.5))           // Weight the email
+                        .map(y => y.split(";"))      // Split the email list back up again
+                        .flatMap(z => z)             // Identity mapping to merge arrays
+                        .map(r => (r,0.5))           // Weight the email
                         .reduceByKey(_ + _)          // reduce emails to get total counts for each email
-                        .sortBy(x => x._2)           // sort emails by count
+                        .sortBy(s => s._2)           // sort emails by count
 
 
     val allEmails = toEmails.join(ccEmails)                         // merge the emails
