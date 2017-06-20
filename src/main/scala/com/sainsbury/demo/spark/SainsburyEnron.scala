@@ -45,19 +45,19 @@ object SainsburyEnron {
     val emailXMLs = sc.wholeTextFiles(emailxmls)
 
     val toEmails =  emailXMLs.map(x=> getAddressees(x._2,"#To"))
-                        .map(y => y.split(";"))       // Split the email list back up again
-                        .flatMap(z => z)              // Identity mapping to merge arrays
-                        .map(r => (r,1))              // Weight the email
-                        .reduceByKey(_ + _)           // reduce emails to get total counts for each email
-                        .sortBy(s => s._2)            // sort emails by count
+                             .map(y => y.split(";"))       // Split the email list back up again
+                             .flatMap(z => z)              // Identity mapping to merge arrays
+                             .map(r => (r,1))              // Weight the email
+                             .reduceByKey(_ + _)           // reduce emails to get total counts for each email
+                             .sortBy(s => s._2)            // sort emails by count
 
 
     val ccEmails =  emailXMLs.map(x=> getAddressees(x._2,"#CC"))
-                        .map(y => y.split(";"))      // Split the email list back up again
-                        .flatMap(z => z)             // Identity mapping to merge arrays
-                        .map(r => (r,0.5))           // Weight the email
-                        .reduceByKey(_ + _)          // reduce emails to get total counts for each email
-                        .sortBy(s => s._2)           // sort emails by count
+                             .map(y => y.split(";"))      // Split the email list back up again
+                             .flatMap(z => z)             // Identity mapping to merge arrays
+                             .map(r => (r,0.5))           // Weight the email
+                             .reduceByKey(_ + _)          // reduce emails to get total counts for each email
+                             .sortBy(s => s._2)           // sort emails by count
 
 
     val allEmails = toEmails.join(ccEmails)                         // merge the emails
@@ -80,9 +80,9 @@ object SainsburyEnron {
     val r = """(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b""".r    // Regex to match emails of type  name@company.com
 
     val toValues = tagXML.withFilter( x => x.attributes("TagName").text == addressee)    // Match the To or Cc Tag
-                     .map(x => x.attributes("TagValue").text)                        // extract the Tag value attribute i.e email address
-                     .toList
-                     .flatMap{ r.findAllIn _ }.toList                                // filter emails of type name@company.com
+                         .map(x => x.attributes("TagValue").text)                        // extract the Tag value attribute i.e email address
+                         .toList
+                         .flatMap{ r.findAllIn _ }.toList                                // filter emails of type name@company.com
 
     toValues.map(x => x.toLowerCase()).mkString(";")          // convert all emails to lowercase  ( incresese aggreagation ) and turn into string
                                                               // This is a hack / workaround
