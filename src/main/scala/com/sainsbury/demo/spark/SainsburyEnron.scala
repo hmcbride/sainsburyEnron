@@ -5,11 +5,7 @@ import org.apache.spark.sql.SparkSession
 import scala.xml.XML
 
 
-/**
-  * Created by hughmcbride on 16/06/2017.
-  */
 object SainsburyEnron {
-
 
 
   def main(args: Array[String]) {
@@ -21,17 +17,10 @@ object SainsburyEnron {
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sparkConf.set("spark.kryoserializer.buffer.mb", "24")
 
-
-    import scala.xml.XML
-
-
     val emailxmls = "/Users/hughmcbride/Downloads/cloudguru/zxmls"
     val emailtexts = "/Users/hughmcbride/Downloads/cloudguru/ztexts"
 
-
-
     val emailFiles = sc.wholeTextFiles(emailtexts)
-
 
     val counts = emailFiles.map(line => ((line._2.split(" ")).length,1))  // Split email by words and create tuple of (wordcount , 1)
     val total_files  = counts.map(_._2).reduce((x, y) => x + y)    // sum up the total number of files
@@ -88,12 +77,6 @@ object SainsburyEnron {
                                                               // This is a hack / workaround
 
   }
-
-
-
-
-
-
 
 }
 
