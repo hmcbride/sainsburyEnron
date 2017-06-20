@@ -76,10 +76,10 @@ object SainsburyEnron {
 
     val xml = XML.loadString(thefile)                                 // parse the xml string
 
-    val s2 = xml \\ "Tag"                                             // Xpath to Tag
+    val tagXML = xml \\ "Tag"                                             // Xpath to Tag
     val r = """(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b""".r    // Regex to match emails of type  name@company.com
 
-    val toValues = s2.withFilter( x => x.attributes("TagName").text == addressee)    // Match the To or Cc Tag
+    val toValues = tagXML.withFilter( x => x.attributes("TagName").text == addressee)    // Match the To or Cc Tag
                      .map(x => x.attributes("TagValue").text)                        // extract the Tag value attribute i.e email address
                      .toList
                      .flatMap{ r.findAllIn _ }.toList                                // filter emails of type name@company.com
