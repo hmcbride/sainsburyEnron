@@ -1,7 +1,9 @@
 package com.sainsbury.demo.spark
 
 
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+
 import scala.xml.XML
 
 
@@ -30,24 +32,10 @@ object SainsburyEnron {
 
     System.out.println("the average file size is "+average_email)
 
-
     val emailXMLs = sc.wholeTextFiles(emailxmls)
 
-    val toEmails =  emailXMLs.map(x=> getAddressees(x._2,"#To"))
-                             .map(y => y.split(";"))       // Split the email list back up again
-                             .flatMap(z => z)              // Identity mapping to merge arrays
-                             .map(r => (r,1))              // Weight the email
-                             .reduceByKey(_ + _)           // reduce emails to get total counts for each email
-                             .sortBy(s => s._2)            // sort emails by count
-
-
-    val ccEmails =  emailXMLs.map(x=> getAddressees(x._2,"#CC"))
-                             .map(y => y.split(";"))      // Split the email list back up again
-                             .flatMap(z => z)             // Identity mapping to merge arrays
-                             .map(r => (r,0.5))           // Weight the email
-                             .reduceByKey(_ + _)          // reduce emails to get total counts for each email
-                             .sortBy(s => s._2)           // sort emails by count
-
+    val toEmails =  getEmailList("#To",1,emailXMLs)
+    val ccEmails =  getEmailList("#CC",0.5,emailXMLs)
 
     val allEmails = toEmails.join(ccEmails)                         // merge the emails
                             .map(y => (y._1, y._2._1 + y._2._2 ))   // aggregate the counts of each
@@ -60,6 +48,16 @@ object SainsburyEnron {
     println("stop")
   }
 
+
+   def getEmailList(addressee: String, weight: Double, emailXMLs: RDD[(String, String)]) = {
+
+    emailXMLs.map(x => getAddressees(x._2, addressee))
+             .map(y => y.split(";")) // Split the email list back up again
+             .flatMap(z => z)        // Identity mapping to merge arrays
+             .map(r => (r, weight))  // Weight the email
+             .reduceByKey(_ + _)     // reduce emails to get total counts for each email
+             .sortBy(s => s._2)      // sort emails by count
+  }
 
   def getAddressees(thefile :String, addressee:String): String = {
 
